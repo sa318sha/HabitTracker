@@ -1,13 +1,18 @@
-import android.util.Log
-
 object HabitSingleton {
+    private var habit: Habit = Habit()
 
+    init {
+        habit = Habit()
+    }
 
-
-    private fun HabitSingleton() {}
-
-
-
+    fun setHabitValues(_name: String, _contract: String){
+        habit.name = _name
+        habit.contract = _contract
+    }
+    fun clearHabitValues(){
+        habit.name = ""
+        habit.contract = ""
+    }
 }
 
 
