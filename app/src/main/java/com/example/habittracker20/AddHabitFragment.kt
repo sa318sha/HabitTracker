@@ -1,19 +1,19 @@
 package com.example.habittracker20
 
-import HabitSingleton
-import android.app.Activity
+import Habit
+import HabitViewModel
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.fragment.app.Fragment
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import androidx.appcompat.app.AppCompatActivity
-import kotlin.contracts.contract
-
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -28,23 +28,52 @@ private const val ARG_PARAM2 = "param2"
  */
 class AddHabitFragment : Fragment() {
     // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = nullout
 
+
+    private lateinit var button: Button
+    private lateinit var errorMessage: TextView
+    private lateinit var habitName: EditText
+    private lateinit var contract: EditText
+    private lateinit var viewModel: HabitViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+        viewModel = ViewModelProvider(requireActivity())[HabitViewModel::class.java]
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+
+
+        Log.d("log", "created fragment view")
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_add_habit, container, false)
+        val root = inflater.inflate(R.layout.fragment_add_habit, container, false)
+
+        button = root.findViewById<Button>(R.id.submitHabitButton)
+        errorMessage =  root.findViewById<TextView>(R.id.errorHabitMessage)
+        habitName = root.findViewById<EditText>(R.id.HabitName)
+        contract = root.findViewById<EditText>(R.id.ContractNameResponse)
+
+
+        button.setOnClickListener{
+            Log.d("log", "submitting habit")
+
+            sendHabit(root)
+            hideFragment()
+        }
+
+        return root
+
+    }
+
+    private fun hideFragment() {
+        parentFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+
+            .replace(R.id.fragmentContainerView, AddButtonFragment.newInstance())
+            .commit()
     }
 
     companion object {
@@ -58,11 +87,10 @@ class AddHabitFragment : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance() =
             AddHabitFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+
                 }
             }
     }
@@ -75,25 +103,38 @@ class AddHabitFragment : Fragment() {
         }
     }
     fun submitHabit(v: View){
-        var habitName = getView()?.findViewById<EditText>(R.id.HabitName)
-        var Contract: EditText? = getView()?.findViewById<EditText>(R.id.ContractNameResponse)
-        if (habitName != null && Contract != null ) {
-            var habittext = habitName.text.toString()
-            var contracttext = Contract.text.toString()
 
-            if(!habittext.equals("")){
-                //valid habit name
-                HabitSingleton.setHabitValues(habittext,contracttext)
-
-            }else{
-                var temp = getView()
-            }
-        }
 
 
 
     }
+    private fun clearHabit(){
+        habitName.setText("")
+        contract.setText("")
+    }
+    private fun removeKeyBoard(root: View) {
+        val mgr: InputMethodManager = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        mgr.hideSoftInputFromWindow(root.windowToken, 0)
+    }
+    private fun sendHabit(root: View){
+        if (habitName != null && contract != null ) {
+            var habitText = habitName.text.toString()
+            var contractText = contract.text.toString()
 
+            if(!habitText.equals("")){
+                var temp: Habit = Habit(habitText,contractText)
+                //valid habit name
+                clearHabit()
+                removeKeyBoard(root)
+                viewModel.changeItem(temp)
+            }else{
+
+                if(errorMessage != null){
+                    errorMessage.text = "Please Enter Valid Habit Name"
+                }
+            }
+        }
+    }
 
 
 
