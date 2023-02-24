@@ -1,20 +1,30 @@
+package model
+
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources.getColorStateList
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.habittracker20.R
+import controller.MainController
 
-class HabitAdapter(): RecyclerView.Adapter<MyViewHolder>() {
+class HabitAdapter(): RecyclerView.Adapter<HabitHolder>() {
+    private lateinit var controller: MainController
 
-
-    lateinit var item: MutableList<Habit>
+    lateinit var habits: List<HabitStatistics>
     lateinit var ctext: Context
 
-    constructor(ctx: Context, i: MutableList<Habit>): this(){
-        ctext = ctx
-        item = i
+
+    constructor(_controller: MainController) : this() {
+        controller = _controller
+        habits=controller.habitStatistics.entrees
+        ctext=controller.mainView
     }
 
     /**
@@ -40,13 +50,26 @@ class HabitAdapter(): RecyclerView.Adapter<MyViewHolder>() {
      * @see .getItemViewType
      * @see .onBindViewHolder
      */
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        Log.d("log","Parent: $parent.id")
-        Log.d("log", "viewType $viewType")
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HabitHolder {
+        Log.d("log","created view holder")
+        //Log.d("log", "viewType $viewType")
 
-        return MyViewHolder(LayoutInflater.from(ctext).inflate(R.layout.habit_view,parent,false))
-//        var t: TextView = TextView()
+        var v: View = LayoutInflater.from(ctext).inflate(R.layout.habit_view,parent,false)
 
+        return HabitHolder(v,object: HabitHolderClickOptions{
+            override fun garbageCan(v: ImageView, adapterPosition: Int) {
+                controller.deleteHabitAtIdx(adapterPosition)
+                notifyDataSetChanged();
+            }
+            override fun toggleHabitCompletion(v: Button) {
+                controller.updateButton(v)
+
+            }
+
+            override fun habitActivity(v: TextView, adapterPosition: Int) {
+                controller.changeActivity(adapterPosition)
+            }
+        })
 
     }
 
@@ -56,7 +79,7 @@ class HabitAdapter(): RecyclerView.Adapter<MyViewHolder>() {
      * @return The total number of items in this adapter.
      */
     override fun getItemCount(): Int {
-        return item.size
+        return habits.size
     }
 
     /**
@@ -80,8 +103,12 @@ class HabitAdapter(): RecyclerView.Adapter<MyViewHolder>() {
      * item at the given position in the data set.
      * @param position The position of the item within the adapter's data set.
      */
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.habitName.text = item[position].name
-        holder.contract.text = item[position].contract
+    override fun onBindViewHolder(holder: HabitHolder, position: Int) {
+        Log.d("log","binded holder")
+
+        holder.bind(habits[position].habit)
+
     }
+
+
 }

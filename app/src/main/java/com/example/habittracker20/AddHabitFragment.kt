@@ -1,19 +1,17 @@
 package com.example.habittracker20
 
-import Habit
-import HabitViewModel
-import android.content.Context
+//import controller.AddHabitFragmentController
+//import Model.HabitViewModel
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import controller.AddHabitFragmentController
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -27,17 +25,17 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class AddHabitFragment : Fragment() {
-    // TODO: Rename and change types of parameters
 
-
-    private lateinit var button: Button
-    private lateinit var errorMessage: TextView
-    private lateinit var habitName: EditText
-    private lateinit var contract: EditText
-    private lateinit var viewModel: HabitViewModel
+    lateinit var button: Button
+    lateinit var errorMessage: TextView
+    lateinit var habitName: EditText
+    lateinit var contract: EditText
+    lateinit var fragmentController: AddHabitFragmentController
+//    private lateinit var viewModel: Model.HabitViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity())[HabitViewModel::class.java]
+        fragmentController = AddHabitFragmentController(this)
+//        viewModel = ViewModelProvider(requireActivity())[Model.HabitViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -46,8 +44,6 @@ class AddHabitFragment : Fragment() {
     ): View? {
 
 
-
-        Log.d("log", "created fragment view")
         // Inflate the layout for this fragment
         val root = inflater.inflate(R.layout.fragment_add_habit, container, false)
 
@@ -59,22 +55,22 @@ class AddHabitFragment : Fragment() {
 
         button.setOnClickListener{
             Log.d("log", "submitting habit")
+            fragmentController.submitHabit(root)
 
-            sendHabit(root)
-            hideFragment()
+
+
+
+            parentFragmentManager.beginTransaction()
+                .setReorderingAllowed(true)
+
+                .remove(this)
+                .commit()
         }
 
         return root
 
     }
 
-    private fun hideFragment() {
-        parentFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
-
-            .replace(R.id.fragmentContainerView, AddButtonFragment.newInstance())
-            .commit()
-    }
 
     companion object {
         /**
@@ -95,47 +91,11 @@ class AddHabitFragment : Fragment() {
             }
     }
 
-    fun clearText(v: View){
 
-        if (v is TextView) {
-            val textView = v as TextView
-            textView.text = "";
-        }
-    }
-    fun submitHabit(v: View){
-
-
-
+    override fun onResume() {
+        super.onResume()
+        Log.d("log", "fragment resumed")
 
     }
-    private fun clearHabit(){
-        habitName.setText("")
-        contract.setText("")
-    }
-    private fun removeKeyBoard(root: View) {
-        val mgr: InputMethodManager = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        mgr.hideSoftInputFromWindow(root.windowToken, 0)
-    }
-    private fun sendHabit(root: View){
-        if (habitName != null && contract != null ) {
-            var habitText = habitName.text.toString()
-            var contractText = contract.text.toString()
-
-            if(!habitText.equals("")){
-                var temp: Habit = Habit(habitText,contractText)
-                //valid habit name
-                clearHabit()
-                removeKeyBoard(root)
-                viewModel.changeItem(temp)
-            }else{
-
-                if(errorMessage != null){
-                    errorMessage.text = "Please Enter Valid Habit Name"
-                }
-            }
-        }
-    }
-
-
 
 }

@@ -1,20 +1,23 @@
 
-interface Test{
-    fun hi()
+interface Observering{
+    fun update()
 }
 
-class Testing: Test {
-
-    var hello: String = "abc"
-    override fun hi() {
+class Test: Observering{
+    override fun update() {
         TODO("Not yet implemented")
     }
 
-
 }
 
-fun hello(){
-    var temp: Test = Testing()
-    temp.hi()
 
+class MainData(){
+    lateinit var list: MutableList<Observering>
+
+
+    fun notifyObservers(){
+        for ( item in list){
+            item.update()
+        }
+    }
 }

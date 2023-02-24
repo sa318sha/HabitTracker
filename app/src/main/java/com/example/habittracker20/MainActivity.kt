@@ -1,29 +1,25 @@
 package com.example.habittracker20
 
-import Habit
-import HabitAdapter
-import HabitViewModel
-import android.database.Observable
+import controller.MainController
+//import model.HabitAdapter
+//import Model.HabitViewModel
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.Recycler
-import kotlin.math.log
+import controller.AddHabitFragmentController
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var habitFragment: AddHabitFragment
     private lateinit var emptyFragment: AddButtonFragment
-    private lateinit var viewModel: HabitViewModel
-    private lateinit var habitRecycler: RecyclerView
-    private lateinit var habitList: MutableList<Habit>
+    private lateinit var controller: MainController
+//    private lateinit var viewModel: Model.HabitViewModel
+//    private lateinit var habitRecycler: RecyclerView
+//    private lateinit var habitList: MutableList<HabitModel>
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -34,35 +30,18 @@ class MainActivity : AppCompatActivity() {
         habitFragment = AddHabitFragment.newInstance()
         emptyFragment = AddButtonFragment.newInstance()
 
-        viewModel = ViewModelProvider(this)[HabitViewModel::class.java]
+
+        controller = MainController(this)
 
 
-        habitList = mutableListOf<Habit>()
+//        supportFragmentManager.beginTransaction()
+//            .setReorderingAllowed(true)
+//
+//            .add(R.id.fragmentContainerView, emptyFragment)
+////
+//            .commit()
 
 
-        habitRecycler= findViewById<RecyclerView>(R.id.recyclerViewID)
-        habitRecycler.layoutManager = LinearLayoutManager(this)
-
-        habitRecycler.adapter = HabitAdapter(application,habitList)
-
-
-        viewModel.SelectedItem.observe(this, Observer{
-            Log.d("log", it.name)
-            var idx: Int = habitList.size
-            habitList.add(idx, it)
-            (habitRecycler.adapter as HabitAdapter).notifyItemInserted(idx)
-        })
-
-
-
-
-
-
-        supportFragmentManager.beginTransaction()
-            .setReorderingAllowed(true)
-
-            .replace(R.id.fragmentContainerView, emptyFragment)
-            .commit()
 
     }
 
@@ -72,19 +51,25 @@ class MainActivity : AppCompatActivity() {
 
 
 
+        Log.d("log", "Hiding Habit Fragment")
+
+
         supportFragmentManager.beginTransaction()
             .setReorderingAllowed(true)
-
-            .replace(R.id.fragmentContainerView, emptyFragment)
+            .remove(habitFragment)
             .commit()
 
 
     }
     fun showAddHabit(v: View){
+        Log.d("log", "Displaying Habit Fragment")
+
+
         supportFragmentManager.beginTransaction()
             .setReorderingAllowed(true)
-            .replace(R.id.fragmentContainerView, habitFragment)
+            .add(R.id.fragmentContainerView,habitFragment)
             .commit()
+
     }
 }
 
